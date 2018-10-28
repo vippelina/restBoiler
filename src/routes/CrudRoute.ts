@@ -9,6 +9,7 @@ export default class CrudRoute {
         this.list = this.list.bind(this)
         this.getById = this.list.bind(this)
         this.post = this.post.bind(this)
+        this.put = this.put.bind(this)
         this.setupRoutes()  
     }
 
@@ -31,13 +32,21 @@ export default class CrudRoute {
         const id: string = req.params.id
         return this.model.findById(id)
         .then(docs => {
-            res.send(docs);
+            res.send(docs)
         }, e => next(e))
+    }
+
+    public put(req: Request, res: Response, next: NextFunction) {
+        const id: string = req.params.id
+        const updateData: object = req.body
+        return this.model.findOneAndUpdate({_id: id}, updateData, {new: true})
+        .then((updated) => res.send(updated), e => next(e))
     }
 
     public setupRoutes() {
         this.router.get('/', this.list);
         this.router.get('/:id', this.getById);
         this.router.post('/', this.post);
+        this.router.put('/:id', this.put);
     }
 }

@@ -7,6 +7,7 @@ import indexRoute from './routes';
 // Create express server
 const app = express()
 
+mongoose.set('useFindAndModify', false);
 //Connect to mongo
 mongoose.connect(MONGODB_URI, {useNewUrlParser: true}).then(() => {
     //  
