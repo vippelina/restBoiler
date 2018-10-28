@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config()
 import express, { Request, Response, NextFunction } from 'express'
 import mongoose from 'mongoose'
 import { MONGODB_URI } from './util/secrets'
@@ -25,4 +27,12 @@ app.use(
 );
 app.use('/', indexRoute);
 
+
+const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+    res.status(500);
+    if(process.env.NODE_ENV !== 'production') {
+        res.send(err.message)
+    }else{res.send()}
+}
+app.use(errorHandler);
 export default app  
