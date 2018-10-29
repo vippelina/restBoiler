@@ -3,6 +3,8 @@ import {model, Schema} from 'mongoose';
 const AccountSchema: Schema = new Schema({
     email: {
         type: String,
+        unique: true,
+        required: true,
         trim: true,
         validate: function(email: string) {
             return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)

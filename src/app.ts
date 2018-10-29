@@ -9,7 +9,9 @@ import indexRoute from './routes';
 // Create express server
 const app = express()
 
+//omit deprecation errors
 mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 //Connect to mongo
 mongoose.connect(MONGODB_URI, {useNewUrlParser: true}).then(() => {
     //  
@@ -28,11 +30,14 @@ app.use(
 app.use('/', indexRoute);
 
 
-const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-    res.status(500);
-    if(process.env.NODE_ENV !== 'production') {
-        res.send(err.message)
-    }else{res.send()}
+const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+    console.log("err name", err.name, err.code);
+    const isMongoBadInputError = err.name === 'ValidationError' || err.code === 11000
+    const statusCode = isMongoBadInputError ? 400 : 500;
+    res.status(statusCode)
+    const hideErrorMessage = process.env.NODE_ENV === 'production' && statusCode === 500
+    if(!hideErrorMessage) return res.send(err.message)
+    res.send()
 }
 app.use(errorHandler);
 export default app  

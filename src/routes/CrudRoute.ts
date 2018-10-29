@@ -10,6 +10,7 @@ export default class CrudRoute {
         this.getById = this.list.bind(this)
         this.post = this.post.bind(this)
         this.put = this.put.bind(this)
+        this.delete = this.delete.bind(this)
         this.setupRoutes()  
     }
 
@@ -43,10 +44,19 @@ export default class CrudRoute {
         .then((updated) => res.send(updated), e => next(e))
     }
 
+    public delete(req: Request, res: Response, next: NextFunction) {
+        const id: string = req.params.id
+        return this.model.findOneAndDelete({_id: id})
+        .then(() => {
+            res.status(202).send();
+        }, e => next(e))
+    }
+
     public setupRoutes() {
         this.router.get('/', this.list);
         this.router.get('/:id', this.getById);
         this.router.post('/', this.post);
         this.router.put('/:id', this.put);
+        this.router.delete('/:id', this.delete);
     }
 }

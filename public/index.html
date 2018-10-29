@@ -5,8 +5,97 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Page Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+  <script>
+      let baseUrl, accountUrl;
+      let listElm;
+      function deleteAccount (id) {
+          return new Promise((resolve, reject) => {
+            $.ajax({
+                url: accountUrl + '/' + id,
+                type: 'DELETE',
+                success: (data) => {
+                    resolve(data)
+                }
+            })
+          })
+      }
+
+      function createAccount (createData) {
+        return new Promise((resolve, reject) => {
+            $.post(accountUrl, createData)
+            .done(created => {
+                return resolve(created)
+            })
+            .fail(err => {
+                alert("Server responded with: "+ err.responseText)
+                console.log("code after alert")
+                resolve()
+            })
+        })
+      }
+
+      function updateList () {
+          let listElements = []
+          return new Promise((resolve, reject) => {
+              $.get(accountUrl, data => {
+                  console.log("Got data", data);
+                data.forEach(d => {
+                    listElements.push('<li>'+d.email+'<button class="btn" id='+d._id+'>Delete</button></li>')
+                })
+    
+                listElm.html(listElements)
+                if(!data.length) {
+                    $('#noItems').show()
+                }else{
+                    $('#noItems').hide()
+                }
+                return resolve()
+              })
+          })
+      }
+
+      function onDeleteClick(e) {
+        e.preventDefault();
+        return deleteAccount(e.target.id)
+        .then(()=> {
+            refreshList()
+        })
+      }
+      function refreshList() {
+          return updateList()
+          .then(() => {
+              $('.btn').click(onDeleteClick)
+          })
+      }
+        $(document).ready(() => {
+            listElm = $("#accounts")
+            let listElements = [];
+            baseUrl = window.location.origin
+            accountUrl = baseUrl + '/account'
+            const emailInputElm = $("input[name='email']")
+            refreshList()
+            $("#createUserForm").submit((e) => {
+                e.preventDefault();
+                const email = emailInputElm.val()
+                emailInputElm.val('')
+                return createAccount({email})
+                .then(refreshList)
+            })
+        })
+    </script>
 </head>
 <body>
-    <h1>HEjsan!</h1>
+    <h1> Crud api </h1>
+    <h2>Accounts</h2>
+    <p id="noItems" style="display: hidden">Currently no items</p>
+    <ul id="accounts" title="list"></ul>
+    <form id="createUserForm">
+        <input name="email" type="text"/>
+        <button type="submit">Create account</button>
+    </form>
 </body>
 </html>
